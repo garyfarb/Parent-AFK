@@ -1,0 +1,398 @@
+openapi: 3.0.3
+info:
+  title: Parent-Child Task Management API
+  description: API for managing tasks assigned by parents to their children.
+  version: 1.0.0
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user (parent/child)
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUser'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+
+  /auth/login:
+    post:
+      summary: Login user and issue JWT token
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token
+        '401':
+          description: Invalid credentials
+
+  /users/{id}:
+    get:
+      summary: Get user profile by ID
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+  
+    patch:
+      summary: Update user profile by ID
+      tags: 
+        - Users
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+    
+    delete:
+      summary: Update user profile by ID
+      tags: 
+        - Users
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the user
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          
+
+  /tasks:
+    post:
+      summary: Create a new task
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+
+    get:
+      summary: Get all tasks created by the parent
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
+  /tasks/{id}:
+    get:
+      summary: Get task details by task ID
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the task
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+
+    put:
+      summary: Update task details
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+        '404':
+          description: Task not found
+
+    delete:
+      summary: Delete a task
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the task
+      responses:
+        '204':
+          description: Task deleted successfully
+        '404':
+          description: Task not found
+
+  /tasks/{id}/approve:
+    post:
+      summary: Approve a task completed by a child
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the task
+      responses:
+        '200':
+          description: Task approved successfully
+        '404':
+          description: Task not found
+
+  /tasks/{id}/reject:
+    post:
+      summary: Reject a task completed by a child with feedback
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                feedback:
+                  type: string
+                  description: Feedback for rejection
+      responses:
+        '200':
+          description: Task rejected with feedback
+        '404':
+          description: Task not found
+
+  /my-tasks:
+    get:
+      summary: Get all tasks assigned to the logged-in child
+      tags:
+        - Tasks
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
+  /my-tasks/{id}/upload-proof:
+    post:
+      summary: Upload a picture as proof of task completion
+      tags:
+        - Tasks
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the task
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                proofImage:
+                  type: string
+                  format: binary
+                  description: Image file as proof of task completion
+      responses:
+        '200':
+          description: Proof uploaded successfully
+        '400':
+          description: Invalid file format
+
+components:
+  schemas:
+    RegisterUser:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        role:
+          type: string
+          enum: [parent, child]
+      required:
+        - name
+        - email
+        - password
+        - role
+
+    LoginUser:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [parent, child]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Task:
+      type: object
+      properties:
+        task_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        assigned_to:
+          type: string
+        created_by:
+          type: string
+        due_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, completed, approved, rejected]
+        proof_image_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - title
+        - description
+        - assigned_to
+        - created_by
+        - due_date
+        - status
